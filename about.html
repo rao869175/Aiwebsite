@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Robotics</title>
+    <link rel="stylesheet" type="text/css" href="about.css">
+    <script src="https://kit.fontawesome.com/5325959c95.js" crossorigin="anonymous"></script>
+  
+    
+       
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="service.html">Services</a></li>
+            <li><a href="example.html">Contacts</a></li>
+            <li><a href="log.html">Login</a></li>
+        </ul>
+    </nav>
+
+    <!-- Content Section -->
+    <section class="content">
+        <h2>Artificial Intelligence in Robotics</h2>
+        <p>
+            Artificial Intelligence (AI) robots represent a remarkable fusion of cutting-edge technology, robotics, and machine learning, pushing the boundaries of what machines can do. Unlike traditional robots that perform tasks based on predetermined algorithms, AI robots are equipped with neural networks that mimic the human brain, enabling them to learn from their environment and experiences, make decisions, and solve problems in a more human-like manner.
+        </p>
+    </section>
+
+    <!-- Chatbot Section -->
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            Aiza Chatbot
+        </div>
+        <div class="message-box" id="message-box">
+            <div class="chat response">
+                <img src="chatbot.jpg" alt="Chatbot Avatar">
+                <span>Hello there! <br> How can I help you today?</span>
+            </div>
+        </div>
+        <div class="messagebar">
+            <form id="chat-form">
+                <div class="bar-wrapper">
+                    <input type="text" placeholder="Enter your message..." id="user-input">
+                    <button type="submit">
+                        <span class="material-symbols-rounded">send</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('chat-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const userInput = document.getElementById('user-input').value.trim();
+            if (userInput !== '') {
+                appendMessage('user', userInput);
+                document.getElementById('user-input').value = '';
+                getChatbotResponse(userInput);
+            }
+        });
+
+        // Function to append messages to the chat container
+        function appendMessage(sender, message) {
+            const messageBox = document.getElementById('message-box');
+            const chat = document.createElement("div");
+            chat.classList.add("chat", sender === 'user' ? 'user' : 'response');
+            const img = document.createElement("img");
+            img.src = sender === 'user' ? "user.jpg" : "chatbot.jpg";
+            img.alt = sender === 'user' ? "User Avatar" : "Chatbot Avatar";
+            chat.appendChild(img);
+
+            const messageText = document.createElement("span");
+            messageText.innerHTML = message;
+            chat.appendChild(messageText);
+            messageBox.appendChild(chat);
+            messageBox.scrollTop = messageBox.scrollHeight; // Scroll to the bottom
+        }
+
+        // Function to fetch response from Groq API
+        function getChatbotResponse(userMessage) {
+            appendMessage('chatbot', 'Typing...');
+
+            fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer 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' // replace with your actual key
+                },
+                body: JSON.stringify({
+                    model: 'llama3-8b-8192', // or whichever model you prefer
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'You are a helpful, friendly, and informative AI assistant.'
+                        },
+                        {
+                            role: 'user',
+                            content: userMessage
+                        }
+                    ],
+                    temperature: 0.7
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove "Typing..." placeholder
+                const messageBox = document.getElementById('message-box');
+                const lastMessage = messageBox.lastChild;
+                messageBox.removeChild(lastMessage);
+
+                // Append actual Groq response
+                const reply = data.choices[0].message.content.trim();
+                appendMessage('chatbot', reply);
+            })
+            .catch(error => {
+                console.error('Error fetching Groq API response:', error);
+                const messageBox = document.getElementById('message-box');
+                const lastMessage = messageBox.lastChild;
+                messageBox.removeChild(lastMessage);
+                appendMessage('chatbot', 'Sorry, something went wrong while contacting the AI.');
+            });
+        }
+    </script>
+</body>
+
+</html>

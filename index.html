@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/5325959c95.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <title>AI Innovation | Future of Technology</title>
+
+    
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="service.html">Services</a></li>
+            <li><a href="example.html">Contacts</a></li>
+            <li><a href="log.html">Login</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <h1>Welcome to AI Future</h1>
+        <p>Revolutionizing industries with cutting-edge Artificial Intelligence solutions.</p>
+        <button>Explore AI Solutions</button>
+    </header>
+
+    <!-- About AI Section -->
+    <section class="about-ai">
+        <h2>Why AI?</h2>
+        <p>Artificial Intelligence is transforming the way businesses operate. Our AI-driven solutions help automate tasks, analyze data, and enhance decision-making.</p>
+    </section>
+
+    <!-- AI Features Section -->
+    <section class="features">
+        <h2>Our AI Capabilities</h2>
+        <div class="feature-box">
+            <div class="feature">
+                <i class="fa-solid fa-brain"></i>
+                <h3>Deep Learning</h3>
+                <p>Advanced neural networks for complex problem-solving.</p>
+            </div>
+            <div class="feature">
+                <i class="fa-solid fa-robot"></i>
+                <h3>Automation</h3>
+                <p>Reduce manual work with AI-powered automation tools.</p>
+            </div>
+            <div class="feature">
+                <i class="fa-solid fa-chart-line"></i>
+                <h3>Data Analytics</h3>
+                <p>Gain insights and predict trends using AI-powered analytics.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chatbot Section -->
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            Aiza Chatbot
+        </div>
+        <div class="message-box" id="message-box">
+            <div class="chat response">
+                <img src="chatbot.jpg" alt="Chatbot Avatar">
+                <span>Hello there! <br> How can I help you today?</span>
+            </div>
+        </div>
+        <form id="chat-form" class="messagebar">
+            <div class="bar-wrapper">
+                <input type="text" placeholder="Enter your message..." id="user-input">
+                <button type="submit" id="sendButton">
+                    <span class="material-symbols-rounded">send</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Handle chatbot form submission
+        document.getElementById('chat-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const userInput = document.getElementById('user-input').value.trim();
+            if (userInput !== '') {
+                appendMessage('user', userInput);
+                document.getElementById('user-input').value = '';
+                getChatbotResponse(userInput);
+            }
+        });
+
+        // Function to append messages to the chat container
+        function appendMessage(sender, message) {
+            const messageBox = document.getElementById('message-box');
+            const chat = document.createElement("div");
+            chat.classList.add("chat", sender === 'user' ? 'user' : 'response');
+            const img = document.createElement("img");
+            img.src = sender === 'user' ? "user.jpg" : "chatbot.jpg";
+            img.alt = sender === 'user' ? "User Avatar" : "Chatbot Avatar";
+            chat.appendChild(img);
+
+            const messageText = document.createElement("span");
+            messageText.innerHTML = message;
+            chat.appendChild(messageText);
+            messageBox.appendChild(chat);
+            messageBox.scrollTop = messageBox.scrollHeight; // Scroll to the bottom
+        }
+
+        // Function to fetch response from Groq API
+        function getChatbotResponse(userMessage) {
+            appendMessage('chatbot', 'Typing...');
+
+            fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer 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' // replace with your actual key
+                },
+                body: JSON.stringify({
+                    model: 'llama3-8b-8192', // or whichever model you prefer
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'You are a helpful, friendly, and informative AI assistant.'
+                        },
+                        {
+                            role: 'user',
+                            content: userMessage
+                        }
+                    ],
+                    temperature: 0.7
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove "Typing..." placeholder
+                const messageBox = document.getElementById('message-box');
+                const lastMessage = messageBox.lastChild;
+                messageBox.removeChild(lastMessage);
+
+                // Append actual Groq response
+                const reply = data.choices[0].message.content.trim();
+                appendMessage('chatbot', reply);
+            })
+            .catch(error => {
+                console.error('Error fetching Groq API response:', error);
+                const messageBox = document.getElementById('message-box');
+                const lastMessage = messageBox.lastChild;
+                messageBox.removeChild(lastMessage);
+                appendMessage('chatbot', 'Sorry, something went wrong while contacting the AI.');
+            });
+        }
+    </script>
+</body>
+
+</html>

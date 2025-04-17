@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/5325959c95.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="example.css">
+    <title>Contact Us</title>
+   
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="service.html">Service</a></li>
+            <li><a href="example.html">Contacts</a></li>
+            <li><a href="log.html">Login</a></li>
+        </ul>
+    </nav>
+
+    <div class="contact-container">
+        <h2>Get in Touch</h2>
+        <p>We'd love to hear from you! Fill out the form below.</p>
+
+        <form action="#" method="post">
+            <div class="input-group">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" name="name" placeholder="Enter your name" required>
+            </div>
+
+            <div class="input-group">
+                <i class="fa-solid fa-envelope"></i>
+                <input type="email" name="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="input-group">
+                <i class="fa-solid fa-comment"></i>
+                <textarea name="message" rows="4" placeholder="Write your message" required></textarea>
+            </div>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <!-- Chatbot Section -->
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            Aiza Chatbot
+        </div>
+        <div class="message-box" id="message-box">
+            <div class="chat response">
+                <img src="chatbot.jpg" alt="Chatbot Avatar">
+                <span>Hello there! <br> How can I help you today?</span>
+            </div>
+        </div>
+        <div class="messagebar">
+            <form id="chat-form">
+                <div class="bar-wrapper">
+                    <input type="text" placeholder="Enter your message..." id="user-input" required>
+                    <button type="submit">
+                        <span class="material-symbols-rounded">send</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const messageBox = document.getElementById('message-box');
+    
+            // Function to append messages to the chat container
+            function appendMessage(sender, message) {
+                const chat = document.createElement("div");
+                chat.classList.add("chat", sender === 'user' ? 'user' : 'response');
+                const img = document.createElement("img");
+                img.src = sender === 'user' ? "user.jpg" : "chatbot.jpg";
+                img.alt = sender === 'user' ? "User Avatar" : "Chatbot Avatar";
+                chat.appendChild(img);
+    
+                const messageText = document.createElement("span");
+                messageText.innerHTML = message;
+                chat.appendChild(messageText);
+                messageBox.appendChild(chat);
+                messageBox.scrollTop = messageBox.scrollHeight; // Scroll to the bottom
+            }
+    
+            // Function to fetch response from Groq API
+            function getChatbotResponse(userMessage) {
+                appendMessage('chatbot', 'Typing...');
+    
+                fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer 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' // Replace with your actual key
+                    },
+                    body: JSON.stringify({
+                        model: 'llama3-8b-8192', // or whichever model you prefer
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'You are a helpful, friendly, and informative AI assistant.'
+                            },
+                            {
+                                role: 'user',
+                                content: userMessage
+                            }
+                        ],
+                        temperature: 0.7
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove "Typing..." placeholder
+                    const lastMessage = messageBox.lastChild;
+                    if (lastMessage) messageBox.removeChild(lastMessage);
+    
+                    // Append actual Groq response
+                    const reply = data.choices[0].message.content.trim();
+                    appendMessage('chatbot', reply);
+                })
+                .catch(error => {
+                    console.error('Error fetching response from Groq API:', error);
+                    const lastMessage = messageBox.lastChild;
+                    if (lastMessage) messageBox.removeChild(lastMessage);
+                    appendMessage('chatbot', 'Sorry, there was an error connecting to the server.');
+                });
+            }
+    
+            // Handle form submission
+            document.getElementById('chat-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const userInput = document.getElementById('user-input').value.trim();
+                if (userInput !== '') {
+                    appendMessage('user', userInput);
+                    document.getElementById('user-input').value = '';
+                    getChatbotResponse(userInput);
+                }
+            });
+        });
+    </script>
+    
+      
+</body>
+
+</html>

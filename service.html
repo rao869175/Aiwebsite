@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/5325959c95.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="service.css">
+    <title>Our Services</title>
+
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="service.html">Service</a></li>
+            <li><a href="example.html">Contacts</a></li>
+            <li><a href="log.html">Login</a></li>
+        </ul>
+    </nav>
+
+    <div class="service-form">
+        <h2>Request Our Services</h2>
+        <p>Fill out the form below to get in touch with us!</p>
+        
+        <form action="#" method="post">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+
+            <label for="service">Select Service</label>
+            <select id="service" name="service">
+                <option value="ai-consulting">AI Consulting</option>
+                <option value="web-development">Web Development</option>
+                <option value="data-analysis">Data Analysis</option>
+                <option value="automation">Automation</option>
+            </select>
+
+            <label for="message">Your Message</label>
+            <textarea id="message" name="message" rows="5" placeholder="Describe your requirements"></textarea>
+
+            <button type="submit">Submit Request</button>
+        </form>
+    </div>
+
+    <!-- Chatbot Section -->
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            Aiza Chatbot
+        </div>
+        <div class="message-box" id="message-box">
+            <div class="chat response">
+                <img src="chatbot.jpg" alt="Chatbot Avatar">
+                <span>Hello there! <br> How can I help you today?</span>
+            </div>
+        </div>
+        <div class="messagebar">
+            <div class="bar-wrapper">
+                <input type="text" placeholder="Enter your message..." id="user-input">
+                <button id="sendButton">
+                    <span class="material-symbols-rounded">send</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Wrap input and button in a form
+            const messageBar = document.querySelector(".messagebar");
+            const barWrapper = messageBar.querySelector(".bar-wrapper");
+            const form = document.createElement("form");
+            form.id = "chat-form";
+            form.appendChild(barWrapper);
+            messageBar.appendChild(form);
+    
+            document.getElementById('chat-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const userInput = document.getElementById('user-input').value.trim();
+                if (userInput !== '') {
+                    appendMessage('user', userInput);
+                    document.getElementById('user-input').value = '';
+                    getChatbotResponse(userInput);
+                }
+            });
+    
+            // Function to append messages to the chat container
+            function appendMessage(sender, message) {
+                const messageBox = document.getElementById('message-box');
+                const chat = document.createElement("div");
+                chat.classList.add("chat", sender === 'user' ? 'user' : 'response');
+                const img = document.createElement("img");
+                img.src = sender === 'user' ? "user.jpg" : "chatbot.jpg";
+                img.alt = sender === 'user' ? "User Avatar" : "Chatbot Avatar";
+                chat.appendChild(img);
+    
+                const messageText = document.createElement("span");
+                messageText.innerHTML = message;
+                chat.appendChild(messageText);
+                messageBox.appendChild(chat);
+                messageBox.scrollTop = messageBox.scrollHeight;
+            }
+    
+            // Function to fetch response from Groq API
+            function getChatbotResponse(userMessage) {
+                appendMessage('chatbot', 'Typing...');
+    
+                fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer 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' // replace with your actual key
+                    },
+                    body: JSON.stringify({
+                        model: 'llama3-8b-8192',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'You are a helpful, friendly, and informative AI assistant.'
+                            },
+                            {
+                                role: 'user',
+                                content: userMessage
+                            }
+                        ],
+                        temperature: 0.7
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove "Typing..."
+                    const messageBox = document.getElementById('message-box');
+                    const lastMessage = messageBox.lastElementChild;
+                    if (lastMessage && lastMessage.querySelector("span").innerText === "Typing...") {
+                        messageBox.removeChild(lastMessage);
+                    }
+    
+                    // Get assistant's reply
+                    const assistantReply = data.choices[0].message.content;
+                    appendMessage('chatbot', assistantReply);
+                })
+                .catch(error => {
+                    console.error('Error fetching chatbot response:', error);
+                    // Remove "Typing..."
+                    const messageBox = document.getElementById('message-box');
+                    const lastMessage = messageBox.lastElementChild;
+                    if (lastMessage && lastMessage.querySelector("span").innerText === "Typing...") {
+                        messageBox.removeChild(lastMessage);
+                    }
+                    appendMessage('chatbot', 'Sorry, there was an error connecting to the chatbot.');
+                });
+            }
+        });
+    </script>
+    
+</body>
+
+</html>
