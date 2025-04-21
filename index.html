@@ -112,12 +112,13 @@
             const lowerMessage = message.toLowerCase();
 
             if (
-                lowerMessage.includes("what is your developer name") ||
-                lowerMessage.includes("who is your developer name") ||
-                lowerMessage.includes("who developed you") ||
-                lowerMessage.includes("developer name")
+                lowerMessage.includes("what is your developer name?") ||
+                lowerMessage.includes("who is your developer ?") ||
+                lowerMessage.includes("who developed you?") ||
+                lowerMessage.includes("who is your creator?")||
+                lowerMessage.includes("who made you?")
             ) {
-                appendMessage('chatbot', 'My developer name is Rao Zain.');
+                appendMessage('chatbot', 'My developer name is Zain Javed.');
             } else {
                 getChatbotResponse(message);
             }
